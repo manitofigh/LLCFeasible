@@ -83,6 +83,10 @@ static ALWAYS_INLINE u64 _rdtscp_aux(u32 *aux) {
     return rax;
 }
 
+static ALWAYS_INLINE void _rdtscp_fence(void) {
+    __asm__ __volatile__("rdtscp" ::: "rax", "rdx", "rcx");
+}
+
 static ALWAYS_INLINE u64 _rdtsc(void) {
     u64 rax;
     __asm__ __volatile__(
@@ -169,6 +173,7 @@ static ALWAYS_INLINE u64 _timer_warmup(void) {
         typeof((P)) __ptr = (P);                                               \
         uint64_t __tsc;                                                        \
         /* make sure that address computation is done before _timer_start */   \
+        _rdtscp_fence();                                                       \
         _force_addr_calc(__ptr);                                               \
         __tsc = _timer_start();                                                \
         ACTION(__ptr);                                                         \
